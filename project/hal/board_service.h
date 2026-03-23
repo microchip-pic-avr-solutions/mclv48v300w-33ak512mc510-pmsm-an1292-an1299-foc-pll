@@ -104,6 +104,35 @@ typedef struct
    bool status;
 } BUTTON_T;
 
+/* Boot Strap charging routine - data types */
+/**
+ * State machine states for bootstrap charging routine
+ */
+typedef enum tagHAL_BOOTSTRAP_FSM_STATE
+{
+    /** Initialization state */
+    BOOTSTRAP_INIT = 0,
+    /** Waiting state */
+    BOOTSTRAP_INIT_WAIT = 1,
+    /** PHASE A bootstrap charging */
+    BOOTSTRAP_PHASE_A_CHARGING = 2,
+    /** PHASE B bootstrap charging */
+    BOOTSTRAP_PHASE_B_CHARGING = 3,
+    /** PHASE C bootstrap charging */
+    BOOTSTRAP_PHASE_C_CHARGING = 4,
+    /** Bootstrap charging is complete */
+    BOOTSTRAP_COMPLETE = 5,
+} HAL_BOOTSTRAP_FSM_STATE;
+
+typedef struct tagHAL_BOOTSTRAP_STATE
+{
+    /** Bootstrap charging routine state */
+    HAL_BOOTSTRAP_FSM_STATE state;
+    /** Bootstrap charging duty cycles of Phase A, B, and C */
+    uint32_t dutycycle;
+    /** Count used to cause delay in several states */
+    uint16_t delayCount;
+} HAL_BOOTSTRAP_T;
 // </editor-fold>
 
 // <editor-fold defaultstate="expanded" desc="DEFINITIONS/CONSTANTS ">
@@ -114,6 +143,8 @@ typedef struct
 #define BOARD_SERVICE_TICK_mSec 1
 /* Button De-bounce in milli Seconds */
 #define BUTTON_DEBOUNCE_mSec    30
+/* Wait delay before starting the bootstrap charging sequence in PWM Cycles */
+#define BOOTSTRAP_INITIAL_DELAY_PWM_CYCLES  1
 
 /* Heart beat LED count is incremented in every Timer 1 interrupt */
 #define HEART_BEAT_LED_COUNT        (HEART_BEAT_LED_mSec*1000/TIMER1_PERIOD_uSec)
@@ -143,6 +174,8 @@ void HAL_MC1MotorInputsRead(MCAPP_MEASURE_T *);
 
 void HAL_MC1ClearPWMPCIFault(void);
 void HAL_TrapHandler(void);
+uint8_t HAL_MC1BootstrapChargeRoutine(MC_DUTYCYCLEOUT_T *,SINGLE_SHUNT_PARM_T *,HAL_BOOTSTRAP_T *);
+void HAL_MC1BootstrapChargeInit(HAL_BOOTSTRAP_T *);
 // </editor-fold
 
 #ifdef __cplusplus

@@ -97,6 +97,7 @@ static void MC1APP_StateMachine(MC1APP_DATA_T *pMCData)
     MCAPP_CONTROL_SCHEME_T *pControlScheme = pMCData->pControlScheme;
     MCAPP_LOAD_T *pLoad = pMCData->pLoad;
     SINGLE_SHUNT_PARM_T *pSingleShunt = pMCData->pSingleShunt;
+    HAL_BOOTSTRAP_T *pBootStrap = pMCData->pBootStrap;
  
     MCAPP_MC1ReceivedDataProcess(pMCData);
 
@@ -114,6 +115,7 @@ static void MC1APP_StateMachine(MC1APP_DATA_T *pMCData)
         MCAPP_FOCInit(pControlScheme);
         MCAPP_MeasureCurrentInit(pMotorInputs);
         MCAPP_GenericLoadInit(pLoad);       
+        HAL_MC1BootstrapChargeInit(pBootStrap);
         
         pMCData->appState = MCAPP_CMD_WAIT;
 
@@ -122,7 +124,10 @@ static void MC1APP_StateMachine(MC1APP_DATA_T *pMCData)
     case MCAPP_CMD_WAIT:
         if(pMCData->runCmd == 1)
         {
-            pMCData->appState = MCAPP_OFFSET;
+            if(HAL_MC1BootstrapChargeRoutine(pMC1Data->pPWMDuty,pMC1Data->pSingleShunt,pBootStrap))
+            {
+                pMCData->appState = MCAPP_OFFSET;
+            }
         }
        break;
        
@@ -158,8 +163,8 @@ static void MC1APP_StateMachine(MC1APP_DATA_T *pMCData)
         
         /* Compensate motor current offsets */
         MCAPP_MeasureCurrentCalibrate(pMotorInputs,pSingleShunt);
-        /* Check for over current fault */
-        if (MCAPP_OverCurrentFault_Detect(pMotorInputs, &pMCData->fault) == 1)
+        /* Check for overcurrent and overvoltage faults */
+        if (MCAPP_Fault_Detect(pMotorInputs, &pMCData->fault) == 1)
         {
             pMCData->appState = MCAPP_FAULT;
             break;
@@ -363,7 +368,7 @@ static void MCAPP_MC1ReceivedDataProcess(MC1APP_DATA_T *pMCData)
     }
     else
     {
-        pControlScheme->ctrlParam.targetSpeed = 0.0;      
+        pControlScheme->ctrlParam.targetSpeed = 0.0f;      
     }
     
     

@@ -65,11 +65,11 @@ extern "C" {
 // <editor-fold defaultstate="expanded" desc="DEFINITIONS/CONSTANTS ">
 
 /*  Critical Minimum window in seconds to measure current through single shunt*/
-#define SSTCRIT_MICROSEC	2.5
+#define SSTCRIT_MICROSEC	2.5f
 /*  Critical Minimum window in counts to measure current through single shunt*/
-#define SSTCRIT             (float)(SSTCRIT_MICROSEC*16*PWM_CLOCK_MHZ)
+#define SSTCRIT             (float)(SSTCRIT_MICROSEC*16.0f*PWM_CLOCK_MHZ)
 /* Additional delay for ADC Trigger in counts of PWM Period */
-#define SS_SAMPLE_DELAY     0
+#define SS_SAMPLE_DELAY     0.0f
 
 // </editor-fold>
 

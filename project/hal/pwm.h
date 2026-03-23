@@ -109,15 +109,15 @@
 
         
 /****Bootstrap Capacitor Charging Parameters*/
-/*Specify bootstrap charging time in Seconds (mention at least 0.01Secs)*/
-#define BOOTSTRAP_CHARGING_TIME_SECS        0.015
+/*Specify bootstrap charging time in seconds (mention at least 0.01 seconds)*/
+#define BOOTSTRAP_CHARGING_TIME_SECS        0.015f
 /*Specify bootstrap Capacitor Tickle Charge Time in Micro Seconds
- * Minimum Time = 1uSec and Maximum Time = 5uSec */
-#define TICKLE_CHARGE_TIME_MICROSEC         1.0
+ * if Bootstrap duty is less than MIN_DUTY, then MIN_DUTY will be applied */
+#define TICKLE_CHARGE_TIME_MICROSEC         3.0
 /*Calculate Bootstrap charging time in number of PWM Half Cycles*/
 #define BOOTSTRAP_CHARGING_COUNTS           (uint32_t)(BOOTSTRAP_CHARGING_TIME_SECS/MC1_LOOPTIME_SEC)
 /*Calculate Bootstrap Capacitor Tickle Charge duty*/
-#define TICKLE_CHARGE_DUTY                  (LOOPTIME_TCY - (uint32_t)(TICKLE_CHARGE_TIME_MICROSEC*16*PWM_CLOCK_MHZ))
+#define TICKLE_CHARGE_DUTY                  (uint32_t)((TICKLE_CHARGE_TIME_MICROSEC*8*PWM_CLOCK_MHZ) + (DEADTIME/2))
 
 #ifdef SINGLE_SHUNT
     #define MIN_DUTY            (uint32_t)(DEADTIME)
@@ -137,7 +137,6 @@ void InitPWMGenerator2 (void);
 void InitPWMGenerator3 (void);
 void InitDutyPWM123Generators(void);
 void InitPWMGenerators(void);   
-void ChargeBootstrapCapacitors(void);
 // </editor-fold>
         
 #ifdef __cplusplus  // Provide C++ Compatibility
