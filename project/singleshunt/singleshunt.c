@@ -83,11 +83,11 @@ void SingleShunt_InitializeParameters(SINGLE_SHUNT_PARM_T *pSingleShunt)
     /* Set delay due to dead time and slew rate etc.*/
 	pSingleShunt->tDelaySample = SS_SAMPLE_DELAY;
     /*Trigger  values of Bus Current Samples made equal to zero */
-    pSingleShunt->trigger1 = 0.0;
-    pSingleShunt->trigger2 = 0.0;
+    pSingleShunt->trigger1 = 0.0f;
+    pSingleShunt->trigger2 = 0.0f;
     /*Initial  values of Bus Current Samples made equal to zero */
-    pSingleShunt->Ibus1 = 0;
-    pSingleShunt->Ibus2 = 0;
+    pSingleShunt->Ibus1 = 0.0f;
+    pSingleShunt->Ibus2 = 0.0f;
 }
 /**
 * <B> Function: SingleShunt_CalculateSpaceVectorPhaseShifted(MC_ABC_T *,
@@ -217,12 +217,12 @@ pSingleShunt->sectorSVM = 0;
             pdcout2->dutycycle3 = pSingleShunt->Ta2;
         break;
         default:
-            pdcout1->dutycycle1 = 0;
-            pdcout1->dutycycle2 = 0;
-            pdcout1->dutycycle3 = 0;
-            pdcout2->dutycycle1 = 0;
-            pdcout2->dutycycle2 = 0;
-            pdcout2->dutycycle3 = 0;
+            pdcout1->dutycycle1 = 0.0f;
+            pdcout1->dutycycle2 = 0.0f;
+            pdcout1->dutycycle3 = 0.0f;
+            pdcout2->dutycycle1 = 0.0f;
+            pdcout2->dutycycle2 = 0.0f;
+            pdcout2->dutycycle3 = 0.0f;
         break;
     }   /* End Of switch - case */
     
@@ -231,10 +231,10 @@ pSingleShunt->sectorSVM = 0;
         tDelaySample is added as a delay so no erroneous measurement is taken*/
 	/*Additional delay to trigger 1*/
     pSingleShunt->trigger1 = (iPwmPeriod+ pSingleShunt->tDelaySample);
-    pSingleShunt->trigger1 = pSingleShunt->trigger1 - ((pSingleShunt->Ta1 + pSingleShunt->Tb1)/2.0) ;
+    pSingleShunt->trigger1 = pSingleShunt->trigger1 - ((pSingleShunt->Ta1 + pSingleShunt->Tb1)/2.0f) ;
     /*Additional delay to trigger 2*/
     pSingleShunt->trigger2 = (iPwmPeriod+  pSingleShunt->tDelaySample);
-    pSingleShunt->trigger2 = pSingleShunt->trigger2 - ((pSingleShunt->Tb1 + pSingleShunt->Tc1)/2.0) ;
+    pSingleShunt->trigger2 = pSingleShunt->trigger2 - ((pSingleShunt->Tb1 + pSingleShunt->Tc1)/2.0f) ;
     
     SINGLE_SHUNT_TRIGGER1 = (uint32_t)(pSingleShunt->trigger1);
     SINGLE_SHUNT_TRIGGER2 = (uint32_t)(pSingleShunt->trigger2);
@@ -266,7 +266,7 @@ inline static void SingleShunt_CalculateSwitchingTime(SINGLE_SHUNT_PARM_T *pSing
 
     pSingleShunt->T1 = iPwmPeriod * pSingleShunt->T1;
     pSingleShunt->T2 = iPwmPeriod * pSingleShunt->T2;
-    pSingleShunt->T7 = (iPwmPeriod-pSingleShunt->T1-pSingleShunt->T2)/2.0;
+    pSingleShunt->T7 = (iPwmPeriod-pSingleShunt->T1-pSingleShunt->T2)/2.0f;
 
 	/* If PWM counter is already counting down, in which case any modification to 
         duty cycles will take effect until PWM counter starts counting up again. 
@@ -365,9 +365,9 @@ void SingleShunt_PhaseCurrentReconstruction(SINGLE_SHUNT_PARM_T *pSingleShunt)
             pSingleShunt->Ia = -pSingleShunt->Ic - pSingleShunt->Ib;
         break;
         default:
-            pSingleShunt->Ic = 10; 
-            pSingleShunt->Ib = 10;
-            pSingleShunt->Ia = 10;
+            pSingleShunt->Ic = 0.0f; 
+            pSingleShunt->Ib = 0.0f;
+            pSingleShunt->Ia = 0.0f;
         break;
     }
 }

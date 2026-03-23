@@ -141,8 +141,6 @@ void InitPWMGenerators(void)
     PG3CONbits.ON = 1;      
     PG1CONbits.ON = 1;      
 
-    /* Function call to charge Bootstrap capacitors*/
-    ChargeBootstrapCapacitors();
 }
 
 /**
@@ -189,84 +187,6 @@ void InitDutyPWM123Generators(void)
     PG2DC = 0;      
     PG1DC = 0;
 
-}
-
-/**
-* <B> Function: ChargeBootstrapCapacitors()    </B>
-*
-* @brief Function to implement Boot Strap Capacitor charging sequence
-*        
-* @param none.
-* @return none.
-* 
-* @example
-* <CODE> ChargeBootstrapCapacitors();     </CODE>
-*
-*/
-void ChargeBootstrapCapacitors(void)
-{
-    uint32_t i = BOOTSTRAP_CHARGING_COUNTS;
-    uint8_t prevStatusCAHALF = 0,currStatusCAHALF = 0;
-
-    /* Enable PWMs only on PWMxL ,to charge bootstrap capacitors at the beginning
-     * Hence PWMxH is over-ridden to "LOW" */
-    /* 0b00 = State for PWM3H-L,PWM2H-L and PWM1H-L if Override is Enabled*/
-    PG3IOCON2bits.OVRDAT = 0;  
-    PG2IOCON2bits.OVRDAT = 0;  
-    PG1IOCON2bits.OVRDAT = 0; 
-    
-    /* 1 = OVRDAT<1> provides data for output on PWM3H,PWM2H and PWM1H*/
-    PG3IOCON2bits.OVRENH = 1;  
-    PG2IOCON2bits.OVRENH = 1;  
-    PG1IOCON2bits.OVRENH = 1;  
-
-    /* 1 = OVRDAT<1> provides data for output on PWM3L,PWM2L and PWM1L*/
-    PG3IOCON2bits.OVRENL = 1;  
-    PG2IOCON2bits.OVRENL = 1;  
-    PG1IOCON2bits.OVRENL = 1;  
-
-    /* PDCx: PWMx GENERATOR DUTY CYCLE REGISTER
-     * Initialize the PWM duty cycle for charging */
-    PWM_PHASE3 = TICKLE_CHARGE_DUTY;
-    PWM_PHASE2 = TICKLE_CHARGE_DUTY;
-    PWM_PHASE1 = TICKLE_CHARGE_DUTY;
-    PWM_PDC3 = TICKLE_CHARGE_DUTY;
-    PWM_PDC2 = TICKLE_CHARGE_DUTY;
-    PWM_PDC1 = TICKLE_CHARGE_DUTY;
-    
-    /* 0 = PWM generator provides data for PWM1L/2L/3L pin */
-    PG1IOCON2bits.OVRENL = 0;
-    PG2IOCON2bits.OVRENL = 0;  
-    PG3IOCON2bits.OVRENL = 0; 
-
-    /*While loop for the Bootstrap charging time in number of PWM Half Cycles*/
-    while(i)
-    {
-        prevStatusCAHALF = currStatusCAHALF;
-        currStatusCAHALF = PG1STATbits.CAHALF;
-        if (prevStatusCAHALF != currStatusCAHALF)
-        {
-            /*Monitoring the Bootstrap charging time in number of PWM Half Cycles*/
-            if (currStatusCAHALF == 0)
-            {
-                i--; 
-            }
-        }
-    }
-    /* PDCx: PWMx GENERATOR DUTY CYCLE REGISTER
-     * Reset the PWM duty cycle to zero after charging */
-    PWM_PHASE3 = 0;
-    PWM_PHASE2 = 0;
-    PWM_PHASE1 = 0;
-    PWM_PDC3 = 0;
-    PWM_PDC2 = 0;
-    PWM_PDC1 = 0;
-
-    /* 0 = PWM generator provides data for output on PWM3H,PWM2H and PWM1H*/
-    PG3IOCON2bits.OVRENH = 0;  
-    PG2IOCON2bits.OVRENH = 0;  
-    PG1IOCON2bits.OVRENH = 0;   
-     
 }
 
 /**

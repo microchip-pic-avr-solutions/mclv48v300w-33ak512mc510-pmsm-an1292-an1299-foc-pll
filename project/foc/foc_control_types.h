@@ -71,8 +71,9 @@ typedef struct
         targetSpeed,                /* Speed Reference command*/
         CLSpeedRampRate,            /* Ramp Reference for Speed */
         idRef,                      /* D axis Current Reference Value */                 
-        iqRef;                      /* Q axis Current Reference Value */
-    
+        iqRef,                      /* Q axis Current Reference Value */
+        vdCmd,                      /* D axis Voltage Override command */ 
+        vqCmd;                      /* Q axis Voltage Override command */
     float
         MaxVoltageSquare;           /* Maximum voltage limit square*/
         
@@ -99,7 +100,7 @@ typedef struct
     
     MC_ANGLE_T OLtheta;             /* Open Loop Angle */
     
-    int16_t qDeltaT;                /* Scaled sampling time */
+    float qDeltaT;                  /* Scaled sampling time */
     
     int32_t OLThetaSum;             /* Open loop Theta Accumulation \
                                      * state variable in Q30*/

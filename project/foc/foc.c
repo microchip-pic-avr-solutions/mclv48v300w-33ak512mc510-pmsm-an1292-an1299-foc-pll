@@ -72,7 +72,6 @@ static void MCAPP_FOCForwardPath(MCAPP_FOC_T *);
 static void MCAPP_ComputeOpenloopReference(MCAPP_OPENLOOPSTARTUP_T *, float );
 static void MCAPP_CalculateModulationSiganl(MC_ABC_T *, MC_ABC_T *, float );
 static void MCAPP_TransformRRFvariables(MCAPP_FOC_T *, int16_t , int16_t );
-static void MCAPP_FOCRotorLock(MCAPP_FOC_T *);
 inline static uint8_t ReadyforClosedLoopTransition(MCAPP_FOC_T *);
 
 // </editor-fold>
@@ -106,25 +105,25 @@ void MCAPP_FOCInit(MCAPP_FOC_T *pFOC)
     MCAPP_FluxWeakeningControlInit(&pFOC->idRefGen);
     
     pCtrlParam->lockTime = 0;
-    pCtrlParam->speedRef = 0;
-    pCtrlParam->idRef = 0;
-    pCtrlParam->iqRef = 0;
+    pCtrlParam->speedRef = 0.0f;
+    pCtrlParam->idRef = 0.0f;
+    pCtrlParam->iqRef = 0.0f;
     
     pFOC->faultStatus = 0;
     
-    pFOC->pPWMDuty->dutycycle3 = 0;
-    pFOC->pPWMDuty->dutycycle2 = 0;
-    pFOC->pPWMDuty->dutycycle1 = 0;
+    pFOC->pPWMDuty->dutycycle3 = 0.0f;
+    pFOC->pPWMDuty->dutycycle2 = 0.0f;
+    pFOC->pPWMDuty->dutycycle1 = 0.0f;
     
     if(pFOC->singleShuntEnable == 1)
     {
         SingleShunt_InitializeParameters(pFOC->pSingleShunt);
-        pFOC->pSingleShunt->phase.dutycycle1 = 0;
-        pFOC->pSingleShunt->phase.dutycycle2 = 0;
-        pFOC->pSingleShunt->phase.dutycycle3 = 0;
-        pFOC->pSingleShunt->pdc.dutycycle1 = 0;
-        pFOC->pSingleShunt->pdc.dutycycle2 = 0;
-        pFOC->pSingleShunt->pdc.dutycycle3 = 0;
+        pFOC->pSingleShunt->phase.dutycycle1 = 0.0f;
+        pFOC->pSingleShunt->phase.dutycycle2 = 0.0f;
+        pFOC->pSingleShunt->phase.dutycycle3 = 0.0f;
+        pFOC->pSingleShunt->pdc.dutycycle1 = 0.0f;
+        pFOC->pSingleShunt->pdc.dutycycle2 = 0.0f;
+        pFOC->pSingleShunt->pdc.dutycycle3 = 0.0f;
         SINGLE_SHUNT_TRIGGER1 = LOOPTIME_TCY/4;
         SINGLE_SHUNT_TRIGGER2 = LOOPTIME_TCY/2;
     }
@@ -158,8 +157,12 @@ void MCAPP_FOCStateMachine(MCAPP_FOC_T *pFOC)
             
         case FOC_RTR_LOCK:
             MCAPP_FOCFeedbackPath(pFOC); 
+            pFOC->ctrlParam.vqCmd = 0.0f;
+            pFOC->ctrlParam.vdCmd = pCtrlParam->lockVoltage;
+            pFOC->voltageCommandOverride = 1;
+            pFOC->commutationAngle = 0.0f;  
+            MCAPP_FOCForwardPath(pFOC);
             
-            MCAPP_FOCRotorLock(pFOC); 
 
             if (pCtrlParam->lockTime < pCtrlParam->lockTimeLimit)
             {
@@ -170,8 +173,9 @@ void MCAPP_FOCStateMachine(MCAPP_FOC_T *pFOC)
                 pCtrlParam->lockTime = 0;
 
                 pFOC->focState = FOC_OPEN_LOOP;
+                pFOC->voltageCommandOverride = 0;
                 /* Reset open loop parameters */
-                pFOC->startup.OLThetaSum = 0; 
+                pFOC->startup.OLThetaSum = 0;
                 MC_ControllerPIReset(&pFOC->piId, pFOC->vdq.d);
                 MC_ControllerPIReset(&pFOC->piIq, pFOC->vdq.q);
                 if(directionCmd)
@@ -211,7 +215,7 @@ void MCAPP_FOCStateMachine(MCAPP_FOC_T *pFOC)
             pFOC->commutationAngle = pFOC->startup.OLtheta.radian ;
             
             pCtrlParam->iqRef = pFOC->startup.OLCurrent;
-            pCtrlParam->idRef = 0;
+            pCtrlParam->idRef = 0.0f;
             
             MCAPP_EstimatorStep(&pFOC->estimatorInterface); 
 
@@ -268,7 +272,7 @@ void MCAPP_FOCStateMachine(MCAPP_FOC_T *pFOC)
             pFOC->piSpeed.inReference = pCtrlParam->speedRef;
             pFOC->piSpeed.param.outMax = pFOC->idRefGen.iqMax;
             pFOC->piSpeed.param.outMin = -(pFOC->idRefGen.iqMax);
-            MC_ControllerPIUpdate(&pFOC->piSpeed);
+            MC_ControllerPIUpdate(&pFOC->piSpeed,pFOC->piIq.stateVar.satState);
             pCtrlParam->iqRef = pFOC->piSpeed.output;      
             
             if(pCtrlParam->idRefOffset > pCtrlParam->currentRamp)
@@ -280,7 +284,7 @@ void MCAPP_FOCStateMachine(MCAPP_FOC_T *pFOC)
                 pCtrlParam->idRefOffset += pCtrlParam->currentRamp;
             }
             else{
-                pCtrlParam->idRefOffset = 0;
+                pCtrlParam->idRefOffset = 0.0f;
             }
             pCtrlParam->idRef = pFOC->idRefGen.idRef + pCtrlParam->idRefOffset;
  
@@ -336,32 +340,41 @@ static void MCAPP_FOCFeedbackPath(MCAPP_FOC_T *pFOC)
 */
 static void MCAPP_FOCForwardPath(MCAPP_FOC_T *pFOC)
 {
-    float vqSquaredLimit, vdSquared;
     
-    /** Execute inner current control loops */
-    /* Execute PI Control of D axis. */
-    pFOC->piId.inMeasure = pFOC->idq.d;          
-    pFOC->piId.inReference = pFOC->ctrlParam.idRef;
-    MC_ControllerPIUpdate(&pFOC->piId);
-    pFOC->vdq.d = pFOC->piId.output;
-    
-    /* Generate Q axis current reference based on available voltage and D axis
-       voltage */
-    vdSquared  = pFOC->vdq.d * pFOC->vdq.d;
-    vqSquaredLimit = pFOC->ctrlParam.MaxVoltageSquare - vdSquared;  
+    if(pFOC->voltageCommandOverride == 0)
+    {
+        float vqSquaredLimit, vdSquared;
 
-    pFOC->piIq.param.outMax = sqrt(vqSquaredLimit);
-    pFOC->piIq.param.outMin = -(pFOC->piIq.param.outMax); 
-    
-    /* Execute PI Control of Q axis current. */  
-    pFOC->piIq.inMeasure = pFOC->idq.q;          
-    pFOC->piIq.inReference  = pFOC->ctrlParam.iqRef;  
-    MC_ControllerPIUpdate(&pFOC->piIq);
-    pFOC->vdq.q = pFOC->piIq.output;
+        /** Execute inner current control loops */
+        /* Execute PI Control of D axis. */
+        pFOC->piId.inMeasure = pFOC->idq.d;          
+        pFOC->piId.inReference = pFOC->ctrlParam.idRef;
+    	MC_ControllerPIUpdate(&pFOC->piId,0);
+        pFOC->vdq.d = pFOC->piId.output;
+
+        /* Generate Q axis current reference based on available voltage and D axis
+           voltage */
+        vdSquared  = pFOC->vdq.d * pFOC->vdq.d;
+        vqSquaredLimit = pFOC->ctrlParam.MaxVoltageSquare - vdSquared;  
+
+        pFOC->piIq.param.outMax = sqrt(vqSquaredLimit);
+        pFOC->piIq.param.outMin = -(pFOC->piIq.param.outMax); 
+
+        /* Execute PI Control of Q axis current. */  
+        pFOC->piIq.inMeasure = pFOC->idq.q;          
+        pFOC->piIq.inReference  = pFOC->ctrlParam.iqRef;  
+    	MC_ControllerPIUpdate(&pFOC->piIq,0);
+        pFOC->vdq.q = pFOC->piIq.output;
+    }
+    else
+    {
+        pFOC->vdq.q = pFOC->ctrlParam.vqCmd;
+        pFOC->vdq.d = pFOC->ctrlParam.vdCmd;
+    }
     
     /* Calculate sin and cos of theta (angle) */		
-    pFOC->sincosTheta.sin = sin(pFOC->commutationAngle);
-    pFOC->sincosTheta.cos = cos(pFOC->commutationAngle); 
+    pFOC->sincosTheta.sinx = sin(pFOC->commutationAngle);
+    pFOC->sincosTheta.cosx = cos(pFOC->commutationAngle); 
 
     /* Perform inverse Clarke and Park transforms and generate phase voltages.*/
     MC_TransformParkInverse(&pFOC->vdq, &pFOC->sincosTheta, &pFOC->valphabeta);
@@ -447,8 +460,8 @@ static void MCAPP_TransformRRFvariables(MCAPP_FOC_T *pFOC,
     newRRFangle = ((float)(newRRFangleCount ) *M_PI/32767.0f); 
     
     /* Update sin and cos of theta (angle) */		
-    pFOC->sincosTheta.sin = sin(newRRFangle);
-    pFOC->sincosTheta.cos = cos(newRRFangle);
+    pFOC->sincosTheta.sinx = sin(newRRFangle);
+    pFOC->sincosTheta.cosx = cos(newRRFangle);
 
     /* Calculate angle difference between previous auxiliary DQ frame 
      * and new actual DQ frame */
@@ -468,46 +481,6 @@ static void MCAPP_TransformRRFvariables(MCAPP_FOC_T *pFOC,
     /*Calculate offset for Iq & Id reference values */
     pFOC->ctrlParam.iqRefOffset = iq_new - pFOC->ctrlParam.iqRef;
     pFOC->ctrlParam.idRefOffset = id_new - pFOC->ctrlParam.idRef;
-}
-
-/**
-* <B> Function: void MCAPP_FOCRotorLock (MCAPP_FOC_T *)  </B>
-*
-* @brief Function to calculate duty cycles for rotor locking
-*
-* @param Pointer to the data structure containing FOC parameters.
-* @return none.
-* 
-* @example
-* <CODE> MCAPP_FOCRotorLock(&mc); </CODE>
-*
-*/
-static void MCAPP_FOCRotorLock(MCAPP_FOC_T *pFOC)
-{
-    MCAPP_CONTROL_T *pCtrlParam = &pFOC->ctrlParam;
-    
-    pFOC->commutationAngle = 0;           
-
-    /* Calculate sin and cos of theta (angle) */		
-    pFOC->sincosTheta.sin = sin(pFOC->commutationAngle);
-    pFOC->sincosTheta.cos = cos(pFOC->commutationAngle); 
-    pFOC->vdq.d = pCtrlParam->lockVoltage;
-    pFOC->vdq.q = 0;
-    /* Perform inverse Clarke and Park transforms and generate phase voltages.*/
-    MC_TransformParkInverse(&pFOC->vdq, &pFOC->sincosTheta, &pFOC->valphabeta);
-    MC_TransformClarkeInverseSwappedInput(&pFOC->valphabeta, &pFOC->vabc); 
-    MCAPP_CalculateModulationSiganl(&pFOC->vabc, &pFOC->vabcModulation, pFOC->vdc);
-
-    /* Execute space vector modulation and generate PWM duty cycles */
-    if(pFOC->singleShuntEnable == 1)
-    {
-        pFOC->sectorSVM = SingleShunt_CalculateSpaceVectorPhaseShifted(&pFOC->vabcModulation, pFOC->pwmPeriod, pFOC->pSingleShunt);
-    }    
-    else
-    {
-        pFOC->sectorSVM = MC_CalculateSpaceVectorPhaseShifted(&pFOC->vabcModulation, pFOC->pwmPeriod, pFOC->pPWMDuty);        
-    }  
-
 }
 
 /**
