@@ -123,6 +123,9 @@ typedef struct
     
     SINGLE_SHUNT_PARM_T 
         singleShunt;
+		
+    HAL_BOOTSTRAP_T
+        bootStrap;
     
     MCAPP_MEASURE_T *pMotorInputs;
     MCAPP_MOTOR_T *pMotor;
@@ -130,6 +133,7 @@ typedef struct
     MCAPP_LOAD_T *pLoad;
     MC_DUTYCYCLEOUT_T *pPWMDuty;
     SINGLE_SHUNT_PARM_T *pSingleShunt;
+	HAL_BOOTSTRAP_T *pBootStrap;
     
 }MC1APP_DATA_T;
 

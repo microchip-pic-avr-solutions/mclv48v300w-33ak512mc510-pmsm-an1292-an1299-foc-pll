@@ -72,8 +72,8 @@ extern "C" {
  * Undefine INTERNAL_OPAMP_CONFIG to use external op-amp outputs from the 
    development board;Ensure the jumper resistors are modified on DIM  */
 #define INTERNAL_OPAMP_CONFIG
-/* Define SINGLE_SHUNT for single shunt current measurement scheme(IBUS)
- * Undefine SINGLE_SHUNT for dual shunt current measurement scheme(IA and IB) */
+/* Define SINGLE_SHUNT for single shunt current measurement scheme(IBUS - AN1299)
+ * Undefine SINGLE_SHUNT for dual shunt current measurement scheme(IA and IB - AN1292) */
 #undef SINGLE_SHUNT
 /*Flux Weakening Variant : 0 = Disable Flux Weakening
                            1 = PI Controller for limiting voltage circle using voltage feedback
@@ -81,7 +81,9 @@ extern "C" {
 #define FLUX_WEAKENING_VARIANT  1
 /*Motor Selection : 1 = Hurst DMA0204024B101(AC300022: Hurst300 or Long Hurst)
                     2 = Hurst DMB0224C10002(AC300020: Hurst075 or Short Hurst)
-                    3 = Leadshine 24V Servo Motor ELVM6020V24FH-B25-HD (200W)*/
+                    3 = Leadshine 24V Servo Motor ELVM6020V24FH-B25-HD (200W)
+                    4 = ACT 24V BLDC 57BLF01 Motor 
+                    5 = ACT 24V BLDC 57BLF02 Motor */
 #define MOTOR  1
     
 // </editor-fold> 
@@ -94,6 +96,10 @@ extern "C" {
     #include "hurst075.h"
 #elif MOTOR == 3
     #include "leadshine24v.h"
+#elif MOTOR == 4
+    #include "act57blf01.h"
+#elif MOTOR == 5
+    #include "act57blf02.h"
 #else
     #include "hurst300.h" 
 #endif
@@ -112,8 +118,6 @@ extern "C" {
     
 /**DC Bus Utilization Factor or Modulation Index Limit*/    
 #define DCBUS_UTILIZATION_FACTOR        0.90f
-/*Maximum utilizable Voltage Limit in closed loop control*/
-#define VMAX_CLOSEDLOOP_CONTROL  ((float)DCBUS_UTILIZATION_FACTOR*DC_LINK_VOLTAGE/SQRT_3) 
 
 // </editor-fold>
 

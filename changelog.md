@@ -1,3 +1,12 @@
+# mclv48v300w-33ak512mc510-pmsm-an1292-an1299-foc-pll v1.0.1
+### Release Highlights
+This is the second version of code for sensorless field oriented control of PMSM using PLL estimator and Single-Shunt Current Reconstruction Algorithm on MCLV-48V-300W board[(EV18H47A)](https://www.microchip.com/en-us/development-tool/ev18h47a) with dsPIC33AK512MC510 MC DIM[(EV67N21A)](https://www.microchip.com/en-us/development-tool/ev67n21a).
+
+### Features Added\Updated
+- Added the support of 24V 3-Phase Brushless DC Motor [ACT 57BLF01](https://www.act-motor.com/professional-china-high-torque-brushless-dc-motor-brushless-dc-motor-57blf-act-10-product/) and [ACT 57BLF02](https://www.act-motor.com/professional-china-high-torque-brushless-dc-motor-brushless-dc-motor-57blf-act-10-product/)
+- Bootstrap charging sequence is modified with state machine
+- Rotor lock is modified to implement with FOC forward path functions using a vd and vq command override variable
+
 # mclv48v300w-33ak512mc510-pmsm-an1292-an1299-foc-pll v1.0.0
 ### Release Highlights
 This is the first version of code for sensorless field oriented control of PMSM using PLL estimator and Single-Shunt Current Reconstruction Algorithm on MCLV-48V-300W board[(EV18H47A)](https://www.microchip.com/en-us/development-tool/ev18h47a) with dsPIC33AK512MC510 MC DIM[(EV67N21A)](https://www.microchip.com/en-us/development-tool/ev67n21a). 

@@ -31,10 +31,10 @@ To clone or download this application firmware on GitHub,
 >In this document, hereinafter this firmware package is referred as **firmware.**
 ### 2.2 Software Tools Used for Testing the firmware
 
-- MPLAB® X IDE **v6.25** 
-- Device Family Pack (DFP): **dsPIC33AK-MC_DFP v1.2.125**
-- Curiosity/Starter Kits Tool Pack : **PKOB4_TP v1.19.1503**
-- MPLAB® XC-DSC Compiler **v3.21**
+- MPLAB® X IDE **v6.30** 
+- Device Family Pack (DFP): **dsPIC33AK-MC_DFP v1.4.172**
+- Curiosity/Starter Kits Tool Pack : **PKOB4_TP v1.24.1752**
+- MPLAB® XC-DSC Compiler **v3.31**
 - MPLAB® X IDE Plugin: **X2C-Scope v1.7.0** 
 > **Note:** </br>
 >The software used for testing the firmware prior to release is listed above. It is recommended to use these or later versions of the tool for building the firmware. All previous versions of Device Family Packs (DFP) and Tool Packs can be downloaded from [Microchip Packs Repository.](https://packs.download.microchip.com/)
@@ -44,13 +44,17 @@ To clone or download this application firmware on GitHub,
 - 24V Power Supply [(AC002013)](https://www.microchipdirect.com/dev-tools/AC002013)
 - 24V 3-Phase Brushless DC Motor - Hurst DMA0204024B101 [(AC300022)](https://www.microchip.com/en-us/development-tool/AC300022) or,
 - 24V 3-Phase Brushless DC Motor - Hurst DMB0224C10002 [(AC300020)](https://www.microchip.com/en-us/development-tool/AC300020) or,
-- 24V 3-Phase Leadshine Servo Motor [(ELVM6020V24FH-B25-HD)](https://www.leadshine.com/product-detail/ELVM6020V24FH-B25-HD.html)
+- 24V 3-Phase Leadshine Servo Motor [(ELVM6020V24FH-B25-HD)](https://www.leadshine.com/product-detail/ELVM6020V24FH-B25-HD.html) or,
+- 24V 3-Phase Brushless DC Motor [(ACT 57BLF01)](https://www.act-motor.com/professional-china-high-torque-brushless-dc-motor-brushless-dc-motor-57blf-act-10-product/) or,
+- 24V 3-Phase Brushless DC Motor [(ACT 57BLF02)](https://www.act-motor.com/professional-china-high-torque-brushless-dc-motor-brushless-dc-motor-57blf-act-10-product/)
 
 > **Note:** </br>
-> All items listed above except Leadshine Servo Motor [(ELVM6020V24FH-B25-HD)](https://www.leadshine.com/product-detail/ELVM6020V24FH-B25-HD.html) are available at [microchip DIRECT](https://www.microchipdirect.com/)
->- Hurst DMA0204024B101(AC300022) is referred as Hurst300 or Long Hurst in the firmware
->- Hurst DMB0224C10002(AC300020) is referred as Hurst075 or Short Hurst in the firmware
->- Leadshine Servo Motor ELVM6020V24FH-B25-HD is referred as leadshine24v in the firmware
+> All items listed above except Leadshine Servo Motor [(ELVM6020V24FH-B25-HD)](https://www.leadshine.com/product-detail/ELVM6020V24FH-B25-HD.html), [ACT 57BLF01](https://www.act-motor.com/professional-china-high-torque-brushless-dc-motor-brushless-dc-motor-57blf-act-10-product/) and [ACT 57BLF02](https://www.act-motor.com/professional-china-high-torque-brushless-dc-motor-brushless-dc-motor-57blf-act-10-product/) are available at [microchip DIRECT](https://www.microchipdirect.com/). The motors are referred as follows in the firmware,
+>- Hurst DMA0204024B101 [(AC300022)](https://www.microchip.com/en-us/development-tool/AC300022) as hurst300 or Long Hurst
+>- Hurst DMB0224C10002 [(AC300020)](https://www.microchip.com/en-us/development-tool/AC300020) as hurst075 or Short Hurst
+>- Leadshine Servo Motor [ELVM6020V24FH-B25-HD](https://www.leadshine.com/product-detail/ELVM6020V24FH-B25-HD.html) as leadshine24v
+>- [ACT 57BLF01](https://www.act-motor.com/professional-china-high-torque-brushless-dc-motor-brushless-dc-motor-57blf-act-10-product/) as act57blf01
+>- [ACT 57BLF02](https://www.act-motor.com/professional-china-high-torque-brushless-dc-motor-brushless-dc-motor-57blf-act-10-product/) as act57blf02
 </br>
 
 ## 3. HARDWARE SETUP
@@ -79,23 +83,23 @@ This section describes the hardware setup required for the demonstration.
       <img  src="images/mclvpower.png" width="300"></p>
  
 
- 5. The board has an onboard programmer **PICkit™ On Board (PKoBv4)** , which can be used for programming or debugging the microcontroller or dsPIC DSC on the DIM. To use the onboard programmer, connect a micro-USB cable between the Host PC and **connector J16** on the development board.
+ 5. The board has an onboard programmer **PICkit™ On Board (PKOBv4)** , which can be used for programming or debugging the microcontroller or dsPIC DSC on the DIM. To use the onboard programmer, connect a micro-USB cable between the Host PC and **connector J16** on the development board.
       <p align="left">
      <img  src="images/mclvpkob4.png" width="300"></p>
 
- 6. Alternatively, connect the Microchip programmer/debugger MPLAB® PICkit™ 5 In-Circuit Debugger[(PG164150)](https://www.microchip.com/en-us/development-tool/pg164150) between the Host PC used for programming the device and the **ICSP header J9** on the development board (as shown). Ensure that PICkit 5 is oriented correctly before proceeding.
+     Alternatively, connect the Microchip programmer/debugger MPLAB® PICkit™ 5 In-Circuit Debugger[(PG164150)](https://www.microchip.com/en-us/development-tool/pg164150) between the Host PC used for programming the device and the **ICSP header J9** on the development board (as shown). Ensure that PICkit 5 is oriented correctly before proceeding.
       <p align="left">
        <img  src="images/mclvprogramming.PNG" width="300"></p>
  </br>
 
 ## 4. SOFTWARE SETUP AND RUN
 ### 4.1 Setup: MPLAB X IDE and MPLAB XC-DSC Compiler
-Install **MPLAB X IDE** and **MPLAB XC-DSC Compiler** versions that support the device **dsPIC33AK512MC510** and **PKoBv4.** The MPLAB X IDE, MPLAB XC-DSC Compiler, and X2C-Scope plug-in used for testing the firmware are mentioned in the [Motor Control Application Firmware Required for the Demonstration](#21-motor-control-application-firmware-required-for-the-demonstration) section. 
+Install **MPLAB X IDE** and **MPLAB XC-DSC Compiler** versions that support the device **dsPIC33AK512MC510** and **PKOBv4.** The MPLAB X IDE, MPLAB XC-DSC Compiler, and X2C-Scope plug-in used for testing the firmware are mentioned in the [Motor Control Application Firmware Required for the Demonstration](#21-motor-control-application-firmware-required-for-the-demonstration) section. 
 
 To get help on  
 
-- MPLAB X IDE installation, refer [link](https://microchipdeveloper.com/mplabx:installation)
-- MPLAB XC-DSC Compiler installation steps, refer [link](https://developerhelp.microchip.com/xwiki/bin/view/software-tools/xc-dsc/install/)
+- MPLAB X IDE installation, refer [link](https://developerhelp.microchip.com/xwiki/bin/view/software-tools/ides/x/install-guide/)
+- MPLAB XC-DSC Compiler installation steps, refer [link](https://developerhelp.microchip.com/xwiki/bin/view/software-tools/compilers/xc-dsc/install/)
 
 If MPLAB IDE v8 or earlier is already installed on your computer, then run the MPLAB driver switcher (Installed when MPLAB®X IDE is installed) to switch from MPLAB IDE v8 drivers to MPLAB X IDE drivers. If you have Windows 8 or 10, you must run the MPLAB driver switcher in **Administrator Mode**. To run the Device Driver Switcher GUI application as administrator, right-click on the executable (or desktop icon) and select **Run as Administrator**. For more details, refer to the MPLAB X IDE help topic **“Before You Begin: Install the USB Device Drivers (For Hardware Tools): USB Driver Installation for Windows Operating Systems.”**
 
@@ -137,7 +141,7 @@ Follow the below instructions, step by step, to set up and run the motor control
           - The motor phase currents can be reconstructed from the DC Bus current by appropriately sampling it during the PWM switching period, called as **single-shunt current reconstruction algorithm**. The firmware can be configured to demonstrate the **'single-shunt configuration'** by **defining** the macro <code>**SINGLE_SHUNT**</code>
                <p align="left"><img  src="images/singleshunt.png" width="300"></p>
 
-     - Firmware is configured to run with Hurst DMA0204024B101 Motor(Hurst300 or Long Hurst-[AC300022](https://www.microchip.com/en-us/development-tool/AC300022)) by default. **Define** the macro to **MOTOR 2** to run with Hurst DMB0224C10002 Motor(Hurst075 or Short Hurst-[AC300020](https://www.microchip.com/en-us/development-tool/AC300020)),or **define** the macro to **MOTOR 3** to run with Leadshine Servo Motor [(ELVM6020V24FH-B25-HD)](https://www.leadshine.com/product-detail/ELVM6020V24FH-B25-HD.html). All the Motors are tested under no load conditions. To achieve optimal performance under loaded conditions, the control parameters in the firmware may need additional tuning.
+     - Firmware is configured to run with Hurst DMA0204024B101 Motor(Hurst300 or Long Hurst-[AC300022](https://www.microchip.com/en-us/development-tool/AC300022)) by default. To run the firmware with a different motor, **define** the macro **MOTOR**  using the corresponding number as specified in the image below. All the Motors are tested under no load conditions. To achieve optimal performance under loaded conditions, the control parameters in the firmware may need additional tuning.
           <p align="left"> <img  src="images/motorselection.PNG" width="600"></p>
      - By default, the macro <code>**FLUX_WEAKENING_VARIANT**</code> is **defined** to **1**, enabling the flux weakening control through a PI controller that limits the voltage circle using voltage feedback. **Define** the macro to **2** to enable the flux weakening using reference speed feed-forward control based on PMSM steady state equations. The flux weakening can be disabled by **defining** the macro to **0**.
           <p align="left"> <img  src="images/fluxweakening.png" width="600"></p>
@@ -154,9 +158,9 @@ Follow the below instructions, step by step, to set up and run the motor control
      In the **Conf:[default]** category window: 
      - Ensure the selected **Device** is **dsPIC33AK512MC510.**
      - Select the **Connected Hardware Tool** to be used for programming and debugging. 
-     - Select the specific Device Family Pack (DFP) from the available list of **Packs.** In this case, **dsPIC33AK-MC_DFP 1.2.125** is selected. 
+     - Select the specific Device Family Pack (DFP) from the available list of **Packs.** In this case, **dsPIC33AK-MC_DFP 1.4.172** is selected. 
      - Select the specific **Compiler Toolchain** from the available list of **XC-DSC** compilers. 
-     In this case, **XC-DSC(v3.21)** is selected.
+     In this case, **XC-DSC(v3.31)** is selected.
      - After selecting Hardware Tool and Compiler Toolchain, Device Pack, click the button **Apply**
 
      Please ensure that the selected MPLAB® XC-DSC Compiler and Device Pack support the device configured in the firmware
@@ -205,7 +209,7 @@ Follow the below instructions, step by step, to set up and run the motor control
 
 ## 5.3  Data visualization through X2C-Scope Plug-in of MPLAB X
 
-X2C-Scope is a third-party plug-in in MPLAB X, which helps in real-time diagnostics. The application firmware comes with the initialization needed to interface the controller with the host PC to enable data visualization through the X2C-Scope plug-in. Ensure the X2C-Scope plug-in is installed. For more information on how to set up a plug-in, refer to either the [Microchip Developer Help page](https://microchipdeveloper.com/mplabx:tools-plugins-available) or the [web page.](https://x2cscope.github.io/docs/MPLABX_Plugin.html)
+X2C-Scope is a third-party plug-in in MPLAB X, which helps in real-time diagnostics. The application firmware comes with the initialization needed to interface the controller with the host PC to enable data visualization through the X2C-Scope plug-in. Ensure the X2C-Scope plug-in is installed. For more information on how to set up a plug-in, refer to either the [Microchip Developer Help page](https://developerhelp.microchip.com/xwiki/bin/view/software-tools/ides/x/plugins) or the [web page.](https://x2cscope.github.io/docs/MPLABX_Plugin.html)
  
 1. To establish serial communication with the host PC, connect a micro-USB cable between the host PC and **connector J16** on the development board. This interface is also used for programming.
 
@@ -268,9 +272,8 @@ For additional information, refer following documents or links.
 3. MCLV-48V-300W Development Board User’s Guide [(DS50003297)](https://ww1.microchip.com/downloads/aemDocuments/documents/MCU16/ProductDocuments/UserGuides/Motor-Control-Low-Voltage-48V-300W-Inverter-Board-Users-Guide-DS50003297.pdf)
 4. dsPIC33AK512MC510 Motor Control Dual In-Line Module (DIM) Information Sheet [(DS70005553)](https://ww1.microchip.com/downloads/aemDocuments/documents/MCU16/ProductDocuments/InformationSheet/dsPIC33AK512MC510-Motor-Control-Dual-In-Line-Module-Information-Sheet-DS70005553.pdf)
 5. dsPIC33AK512MPS512 Family datasheet [(DS70005591)](https://ww1.microchip.com/downloads/aemDocuments/documents/MCU16/ProductDocuments/DataSheets/dsPIC33AK512MPS512-Family-Data-Sheet-DS70005591.pdf)
-6. MPLAB® X IDE User’s Guide [(DS50002027)](https://ww1.microchip.com/downloads/en/DeviceDoc/50002027E.pdf) or [MPLAB® X IDE help](https://microchipdeveloper.com/xwiki/bin/view/software-tools/x/)
-7. [MPLAB® X IDE installation](http://microchipdeveloper.com/mplabx:installation)
-8. [MPLAB® XC-DSC Compiler installation](https://developerhelp.microchip.com/xwiki/bin/view/software-tools/xc-dsc/install/)
+6. MPLAB® X IDE User’s Guide [(DS50002027)](https://ww1.microchip.com/downloads/aemDocuments/documents/DEV/ProductDocuments/UserGuides/MPLAB_X_IDE_Users_Guide_50002027.pdf) or [MPLAB® X IDE help](https://developerhelp.microchip.com/xwiki/bin/view/software-tools/ides/x/)
+7. [MPLAB® X IDE installation](https://developerhelp.microchip.com/xwiki/bin/view/software-tools/ides/x/install-guide/)
+8. [MPLAB® XC-DSC Compiler installation](https://developerhelp.microchip.com/xwiki/bin/view/software-tools/compilers/xc-dsc/install/)
 9. [Installation and setup of X2Cscope plugin for MPLAB X](https://x2cscope.github.io/docs/MPLABX_Plugin.html)
 10. [Microchip Packs Repository](https://packs.download.microchip.com/)
-11. [Programming and Debugging the dsPIC33A on MPLAB X IDE v6.20 and IPE v6.20](https://developerhelp.microchip.com/xwiki/bin/view/software-tools/ides/x/)

@@ -117,7 +117,7 @@ void InitOscillator (void)
      */
     
     /* PLL Feedback Divider bits (also denoted as 'M', PLL multiplier)
-     * M = (PLLFBDbits.PLLFBDIV)= 150     */
+     * M = (PLLFBDbits.PLLFBDIV)= 100     */
       PLL1DIVbits.PLLFBDIV = 100;
 
     /* PLL Phase Detector I/P Divider Select bits(denoted as 'N1',PLL pre-scaler)
@@ -160,7 +160,7 @@ void InitOscillator (void)
     CLK1CONbits.NOSC = 5; 
     CLK1CONbits.OSWEN = 1; 
     while (CLK1CONbits.OSWEN);
-    CLK1CONbits.DIVSWEN =1;
+    CLK1CONbits.DIVSWEN = 1;
     while (CLK1CONbits.DIVSWEN);
     
     /** Clock used for PWM  
@@ -173,7 +173,7 @@ void InitOscillator (void)
     CLK5CONbits.NOSC = 7;
     CLK5CONbits.OSWEN = 1;
     while (CLK5CONbits.OSWEN);
-    CLK5CONbits.DIVSWEN =1;
+    CLK5CONbits.DIVSWEN = 1;
     while (CLK5CONbits.DIVSWEN);
     
     /** Clock used for ADC  
@@ -186,7 +186,7 @@ void InitOscillator (void)
     CLK6CONbits.NOSC = 5;
     CLK6CONbits.OSWEN = 1; 
     while (CLK6CONbits.OSWEN);
-    CLK6CONbits.DIVSWEN =1;
+    CLK6CONbits.DIVSWEN = 1;
     while (CLK6CONbits.DIVSWEN);
     
     /** Clock used for DAC and CMP  
@@ -199,7 +199,7 @@ void InitOscillator (void)
     CLK7CONbits.NOSC = 7; 
     CLK7CONbits.OSWEN = 1; 
     while (CLK7CONbits.OSWEN);
-    CLK7CONbits.DIVSWEN =1;
+    CLK7CONbits.DIVSWEN = 1;
     while (CLK7CONbits.DIVSWEN);
  
     /** Clock used for UART  
@@ -212,7 +212,7 @@ void InitOscillator (void)
     CLK8CONbits.NOSC = 5; 
     CLK8CONbits.OSWEN = 1; 
     while (CLK8CONbits.OSWEN);
-    CLK8CONbits.DIVSWEN =1;
+    CLK8CONbits.DIVSWEN = 1;
     while (CLK8CONbits.DIVSWEN);
     
     /** Reference Clock Generator REFO1 output through PPS (PPS to be 37)
@@ -225,7 +225,7 @@ void InitOscillator (void)
     CLK13CONbits.NOSC = 5; 
     CLK13CONbits.OSWEN = 1; 
     while (CLK13CONbits.OSWEN);
-    CLK13CONbits.DIVSWEN =1;
+    CLK13CONbits.DIVSWEN = 1;
     while (CLK13CONbits.DIVSWEN);
     
 }

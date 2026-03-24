@@ -92,6 +92,7 @@ void MCAPP_MC1ParamsInit(MC1APP_DATA_T *pMCData)
     pMCData->pMotor = &pMCData->motor;
     pMCData->pPWMDuty = &pMCData->PWMDuty;
     pMCData->pSingleShunt = &pMCData->singleShunt;
+    pMCData->pBootStrap = &pMCData->bootStrap;
     
     /* Configure Control Scheme */
     MCAPP_MC1ControlSchemeConfig(pMCData);
@@ -119,11 +120,13 @@ void MCAPP_MC1ControlSchemeConfig(MC1APP_DATA_T *pMCData)
     MCAPP_MEASURE_T *pMotorInputs;
     MCAPP_MOTOR_T *pMotor;
     MCAPP_LOAD_T *pLoad;
+	HAL_BOOTSTRAP_T *pBootStrap;
 
     pControlScheme = pMCData->pControlScheme;
     pMotorInputs = pMCData->pMotorInputs;
     pMotor = pMCData->pMotor;
     pLoad = pMCData->pLoad;
+    pBootStrap = pMCData->pBootStrap;
  
     /* Configure Inputs */  
 #ifdef SINGLE_SHUNT
@@ -170,6 +173,7 @@ void MCAPP_MC1ControlSchemeConfig(MC1APP_DATA_T *pMCData)
     
     /* Initialize fault parameters */
     pMCData->fault.overCurrentFaultLimit = OC_FAULT_LIMIT_PHASE;
+	pMCData->fault.overVoltageFaultLimit = OVER_VOLATGE_FAULT_LIMIT_DCBUS;
     
     /* Initialize startup parameters */
     pControlScheme->startup.lockCurrent = LOCK_CURRENT;
@@ -183,21 +187,24 @@ void MCAPP_MC1ControlSchemeConfig(MC1APP_DATA_T *pMCData)
     pControlScheme->piId.param.ki = D_CURRCNTR_ITERM;                 
     pControlScheme->piId.param.outMax = D_CURRCNTR_OUTMAX;
     pControlScheme->piId.param.outMin = -D_CURRCNTR_OUTMAX;
-    pControlScheme->piId.stateVar.integrator = 0;
+    pControlScheme->piId.stateVar.integrator = 0.0f;
+    pControlScheme->piId.stateVar.satState = 0;
 
     /* Initialize PI controller used for Q axis current control */   
     pControlScheme->piIq.param.kp = Q_CURRCNTR_PTERM;       
     pControlScheme->piIq.param.ki = Q_CURRCNTR_ITERM;                  
     pControlScheme->piIq.param.outMax = Q_CURRCNTR_OUTMAX;
     pControlScheme->piIq.param.outMin = -Q_CURRCNTR_OUTMAX;
-    pControlScheme->piIq.stateVar.integrator = 0;
+    pControlScheme->piIq.stateVar.integrator = 0.0f;
+    pControlScheme->piIq.stateVar.satState = 0;
 
     /* Initialize speed PI controller  */   
     pControlScheme->piSpeed.param.kp = SPEEDCNTR_PTERM;       
     pControlScheme->piSpeed.param.ki = SPEEDCNTR_ITERM;           
     pControlScheme->piSpeed.param.outMax = SPEEDCNTR_OUTMAX;   
     pControlScheme->piSpeed.param.outMin = -SPEEDCNTR_OUTMAX;
-    pControlScheme->piSpeed.stateVar.integrator = 0;
+    pControlScheme->piSpeed.stateVar.integrator = 0.0f;
+    pControlScheme->piSpeed.stateVar.satState = 0;
 
     /* Initialize PLL Estimator */
     pControlScheme->estimator.pCtrlParam  = &pControlScheme->ctrlParam;
@@ -223,7 +230,7 @@ void MCAPP_MC1ControlSchemeConfig(MC1APP_DATA_T *pMCData)
     pControlScheme->idRefGen.feedBackFW.pVdq       =  &pControlScheme->vdq;
     pControlScheme->idRefGen.feedBackFW.pMotor      = pMCData->pMotor;
     pControlScheme->idRefGen.feedBackFW.voltageMagRef = EFFECTIVE_VOLATGE_FW;
-    pControlScheme->idRefGen.feedBackFW.FWeakPI.param.outMax = 0;
+    pControlScheme->idRefGen.feedBackFW.FWeakPI.param.outMax = 0.0f;
     pControlScheme->idRefGen.feedBackFW.FWeakPI.param.outMin = MAX_FW_NEGATIVE_ID_REF;
     pControlScheme->idRefGen.feedBackFW.FWeakPI.param.kp = FW_PTERM;
     pControlScheme->idRefGen.feedBackFW.FWeakPI.param.ki = FW_ITERM;    
@@ -246,6 +253,11 @@ void MCAPP_MC1ControlSchemeConfig(MC1APP_DATA_T *pMCData)
     /* Output Initializations */
     pControlScheme->pwmPeriod = (float)LOOPTIME_TCY; 
     pControlScheme->pPWMDuty = pMCData->pPWMDuty;
+	
+	/* Boot Strap Capacitor Charging Initializations */
+    pBootStrap->delayCount = BOOTSTRAP_CHARGING_COUNTS;
+    pBootStrap->dutycycle = (LOOPTIME_TCY - TICKLE_CHARGE_DUTY);
+    pBootStrap->state = 0;
     
 }
 

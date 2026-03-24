@@ -57,7 +57,6 @@ extern "C" {
 #include <math.h>
 #include <stdint.h>
 
-#include "mc1_user_params.h"
 // </editor-fold>
 
 // <editor-fold defaultstate="expanded" desc="DEFINITIONS/CONSTANTS ">
@@ -88,12 +87,10 @@ extern "C" {
 /** D-axis Current Control Loop - PI Coefficients */
 #define D_CURRCNTR_PTERM                                7.36667f
 #define D_CURRCNTR_ITERM                                0.423333f
-#define D_CURRCNTR_OUTMAX                               VMAX_CLOSEDLOOP_CONTROL
 
 /** Q-axis Current Control Loop - PI Coefficients */
 #define	Q_CURRCNTR_PTERM                                7.36667f
 #define	Q_CURRCNTR_ITERM                                0.423333f
-#define Q_CURRCNTR_OUTMAX                               VMAX_CLOSEDLOOP_CONTROL
 
 /** Speed Control Loop - PI Coefficients */
 #define SPEEDCNTR_PTERM                                 0.00114f
@@ -104,7 +101,7 @@ extern "C" {
 /* BEMF filter cut off frequency (unit : Hz)*/
 #define BEMF_FILTER_CUTOFF_FREQUENCY                    250.0f
 /* Velocity filter cut off frequency (unit : Hz)*/
-#define VELOCITY_FILTER_CUTOFF_FREQUENCY                55.0f    
+#define VELOCITY_FILTER_CUTOFF_FREQUENCY                75.0f    
     
 /* Control parameters */
 /* Open loop startup peak current per phase (unit : amps) */
@@ -123,6 +120,8 @@ extern "C" {
 #define OC_FAULT_LIMIT_PHASE                            3.5f  
 /* Overcurrent fault limit(comparator and Fault PCI) - bus current (unit : amps)*/
 #define OC_FAULT_LIMIT_DCBUS                            3.0f  
+/* DC Bus Overvoltage fault limit(software) (unit : volts) */
+#define OVER_VOLATGE_FAULT_LIMIT_DCBUS                  52.0f 
     
 /* Rotor locking parameters */
 /* Lock time for Motor's poles alignment (unit : seconds)*/
@@ -134,10 +133,10 @@ extern "C" {
 /* Voltage circle limit for flux weakening*/
 #define FW_VOLATGE_MARGIN_FACTOR                        0.90f
 /* Maximum D-axis current Reference for Flux Weakening (unit : amps)*/
-#define MAX_FW_NEGATIVE_ID_REF                          -(NOMINAL_CURRENT_PEAK)
+#define MAX_FW_NEGATIVE_ID_REF                          -(NOMINAL_CURRENT_PEAK*0.9f)
 /* Voltage feedback Flux Weakening controller parameters */
-#define FW_PTERM                                        SPEEDCNTR_PTERM*20 
-#define FW_ITERM                                        SPEEDCNTR_ITERM*20
+#define FW_PTERM                                        SPEEDCNTR_PTERM*20.0f 
+#define FW_ITERM                                        SPEEDCNTR_ITERM*20.0f
 /* Flux Weakening Id reference filter cut off frequency (unit : Hz)*/
 #define FW_ID_FILTER_CUTOFF_FREQUENCY                   100.0f
     

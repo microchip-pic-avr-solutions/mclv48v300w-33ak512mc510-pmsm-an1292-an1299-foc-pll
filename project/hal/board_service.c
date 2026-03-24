@@ -543,3 +543,134 @@ void HAL_MC1ClearPWMPCIFault(void)
     PG2F1PCI1bits.SWTERM = 1;
     PG3F1PCI1bits.SWTERM = 1;  
 }
+
+/**
+* <B> Function: HAL_MC1BootstrapChargeRoutine(MC_DUTYCYCLEOUT_T *,SINGLE_SHUNT_PARM_T *, HAL_BOOTSTRAP_T *) </B>
+*
+* @brief Function to execute bootstrap charging routine
+*        
+* @param Pointer to the data structure containing duty cycles for dual shunt
+* @param Pointer to the data structure containing single shunt
+* @param Pointer to the data structure containing bootstrap variables
+* @return bootstrap charging completion status
+* 
+* @example
+* <CODE> HAL_MC1BootstrapChargeRoutine(pPdc,pSingleShunt,pBootstrap); </CODE>
+*
+*/
+uint8_t HAL_MC1BootstrapChargeRoutine(MC_DUTYCYCLEOUT_T *pDuty,SINGLE_SHUNT_PARM_T *pSingleShunt,HAL_BOOTSTRAP_T *pBootstrap)
+{
+    uint8_t returnState = 0;
+
+    /* Bootstrap charging state machine */
+    switch(pBootstrap->state)
+    {
+        case BOOTSTRAP_INIT:
+            /* Boot Strap routine initialization */
+            HAL_MC1PWMDisableOutputs();
+            pBootstrap->delayCount = BOOTSTRAP_INITIAL_DELAY_PWM_CYCLES;
+            pBootstrap->state = BOOTSTRAP_INIT_WAIT;
+            break;
+            
+        case BOOTSTRAP_INIT_WAIT:
+            /* Bootstrap duty */
+            /* if Bootstrap duty is less than MIN_DUTY, then MIN_DUTY will be applied */
+#ifdef SINGLE_SHUNT
+            pSingleShunt->phase.dutycycle1 = pBootstrap->dutycycle;
+            pSingleShunt->phase.dutycycle2 = pBootstrap->dutycycle;
+            pSingleShunt->phase.dutycycle3 = pBootstrap->dutycycle;
+            pSingleShunt->pdc.dutycycle1 = pBootstrap->dutycycle;
+            pSingleShunt->pdc.dutycycle2 = pBootstrap->dutycycle;
+            pSingleShunt->pdc.dutycycle3 = pBootstrap->dutycycle;        
+#else
+            pDuty->dutycycle1 = pBootstrap->dutycycle;
+            pDuty->dutycycle2 = pBootstrap->dutycycle;
+            pDuty->dutycycle3 = pBootstrap->dutycycle;
+#endif
+            pBootstrap->delayCount = BOOTSTRAP_CHARGING_COUNTS;
+            pBootstrap->state = BOOTSTRAP_PHASE_A_CHARGING;
+            break;
+            
+        case BOOTSTRAP_PHASE_A_CHARGING:
+            /*  Override Disable ; 0 = PWM Generator provides data for the PWM1L pin */
+            PG1IOCON2bits.OVRENL = 0;
+            /* Wait for a preset duration of time to charge the Phase-A bootstrap */
+            if (pBootstrap->delayCount == 0)
+            {
+                pBootstrap->delayCount = BOOTSTRAP_CHARGING_COUNTS;
+                pBootstrap->state = BOOTSTRAP_PHASE_B_CHARGING;
+            }
+            break;
+
+        case BOOTSTRAP_PHASE_B_CHARGING:
+            /* Override Enable ; 1 = OVRDAT<0> provides data for output on PWM1L pin */
+            PG1IOCON2bits.OVRENL = 1;
+            /*  Override Disable ; 0 = PWM Generator provides data for the PWM2L pin */
+            PG2IOCON2bits.OVRENL = 0;
+            /* Wait for a preset duration of time to charge the Phase-B bootstrap */
+            if (pBootstrap->delayCount == 0)
+            {
+                pBootstrap->delayCount = BOOTSTRAP_CHARGING_COUNTS;
+ 
+                pBootstrap->state = BOOTSTRAP_PHASE_C_CHARGING;
+            }
+            break;
+            
+        case BOOTSTRAP_PHASE_C_CHARGING:
+            /* Override Enable ; 1 = OVRDAT<0> provides data for output on PWM2L pin */
+            PG2IOCON2bits.OVRENL = 1;
+            /*  Override Disable ; 0 = PWM Generator provides data for the PWM3L pin */
+            PG3IOCON2bits.OVRENL = 0;
+            /* Wait for a preset duration of time to charge the Phase-C bootstrap */
+            if (pBootstrap->delayCount == 0)
+            {
+                pBootstrap->delayCount = BOOTSTRAP_CHARGING_COUNTS;
+                pBootstrap->state = BOOTSTRAP_COMPLETE;
+            }
+            break;
+            
+        case BOOTSTRAP_COMPLETE:
+            /* Bootstrap sequence is complete, wait in this state */
+            returnState = 1;
+            HAL_MC1PWMDisableOutputs();
+            /* Reseting the duty variables to minimum duty after bootstrap completion*/
+#ifdef SINGLE_SHUNT
+            pSingleShunt->phase.dutycycle1 = MIN_DUTY;
+            pSingleShunt->phase.dutycycle2 = MIN_DUTY;
+            pSingleShunt->phase.dutycycle3 = MIN_DUTY;
+            pSingleShunt->pdc.dutycycle1 = MIN_DUTY;
+            pSingleShunt->pdc.dutycycle2 = MIN_DUTY;
+            pSingleShunt->pdc.dutycycle3 = MIN_DUTY;        
+#else
+            pDuty->dutycycle1 = MIN_DUTY;
+            pDuty->dutycycle2 = MIN_DUTY;
+            pDuty->dutycycle3 = MIN_DUTY;
+#endif
+            break;  
+    }
+
+    /* Decrement counter for delay */
+    if (pBootstrap->delayCount > 0)
+    {
+        pBootstrap->delayCount--;
+    }
+    
+    return returnState;
+}
+/**
+* <B> Function: HAL_MC1BootstrapChargeInit(HAL_BOOTSTRAP_T *) </B>
+*
+* @brief Function to execute initialize the bootstrap charging variables
+*        
+* @param Pointer to the data structure containing bootstrap variables
+* @return none
+* 
+* @example
+* <CODE> HAL_MC1BootstrapChargeInit(pBootstrap); </CODE>
+*
+*/
+void HAL_MC1BootstrapChargeInit(HAL_BOOTSTRAP_T *pBootStrap)
+{
+    /* Initialize the bootstrap parameters */
+    pBootStrap->state = 0;
+}

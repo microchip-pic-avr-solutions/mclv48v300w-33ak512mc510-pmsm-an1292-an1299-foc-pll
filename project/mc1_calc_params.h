@@ -73,11 +73,11 @@ extern "C" {
 #define MECHANICAL_RPM_TO_ELEC_RAD_PER_S    (float)(POLE_PAIRS*M_PI/30.0f)
     
 /* Delta Ts factor */
-#define	DELTA_T_Q30                 (float)(MC1_LOOPTIME_SEC *(2.0/60.0)*POLE_PAIRS * Q30_MAX)
+#define	DELTA_T_Q30                 (float)(MC1_LOOPTIME_SEC *(2.0f/60.0f)*POLE_PAIRS * Q30_MAX)
 
 /* Back EMF PLL Estimator Parameters */
 #define	D_ILIMIT_HS                 (float)(NOMINAL_CURRENT_PEAK*MC1_LOOPTIME_SEC*MAXIMUM_SPEED_RPM*(2.0f*M_PI/60.0f)*POLE_PAIRS)
-#define	D_ILIMIT_LS                 (float)(4*D_ILIMIT_HS) 
+#define	D_ILIMIT_LS                 (float)(4.0f*D_ILIMIT_HS) 
 #define ESTIM_INVERSE_BEMF_CONSTANT (float)( 1.0f/( MOTOR_BEMF_CONSTANT_MECH/(SQRT_3 *1000.0f ) ) )
 #define THRESHOLD_SPEED_DERIVATIVE  (float) MAXIMUM_SPEED_RPM
 
@@ -93,13 +93,13 @@ extern "C" {
 #define LOCK_TIME_COUNTS            LOCK_TIME_SEC/MC1_LOOPTIME_SEC
 /* Locking Voltage (unit : volts)
  * considered 200% to compensate dead time and circuit resistance*/
-#define LOCKING_VOLTAGE             (float)((LOCK_CURRENT * MOTOR_PER_PHASE_RESISTANCE) * 2.0)
+#define LOCKING_VOLTAGE             (float)((LOCK_CURRENT * MOTOR_PER_PHASE_RESISTANCE) * 2.0f)
        
 /* Flux Weakening Parameters */
 /* Effective voltage considered for Id reference calculation */
 #define EFFECTIVE_VOLATGE_FW        (float)(VMAX_CLOSEDLOOP_CONTROL * FW_VOLATGE_MARGIN_FACTOR )
 /*Id reference calculation starts at this speed*/
-#define FLUX_WEAKENING_ENABLE_SPEED (float)(NOMINAL_SPEED_RPM/2.0)
+#define FLUX_WEAKENING_ENABLE_SPEED (float)(NOMINAL_SPEED_RPM/2.0f)
 /* Id reference filter parameters*/
 #define TAU_FW_IDREF                (float)(1.0f/(2.0f*M_PI*FW_ID_FILTER_CUTOFF_FREQUENCY)) 
 #define KFILTER_FW_IDREF            (float)(MC1_LOOPTIME_SEC/(MC1_LOOPTIME_SEC+TAU_FW_IDREF))
@@ -117,6 +117,15 @@ extern "C" {
     
 /* Comparator reference for PWM Fault PCI from DC Bus current*/
 #define CMP_REF_DCBUS_FAULT         (uint16_t)(((OC_FAULT_LIMIT_DCBUS*HALF_ADC_COUNT)/MC1_PEAK_CURRENT)+HALF_ADC_COUNT)
+    
+/*Maximum utilizable Voltage Limit in closed loop control*/
+#define VMAX_CLOSEDLOOP_CONTROL         ((float)DCBUS_UTILIZATION_FACTOR*DC_LINK_VOLTAGE/SQRT_3)
+    
+/* Current PI Controller - Maximum Output Voltage for SVM in closed loop */
+/** D-axis Current Control Loop */
+#define D_CURRCNTR_OUTMAX                VMAX_CLOSEDLOOP_CONTROL
+/** Q-axis Current Control Loop */
+#define Q_CURRCNTR_OUTMAX                VMAX_CLOSEDLOOP_CONTROL
 
 // </editor-fold>
 
